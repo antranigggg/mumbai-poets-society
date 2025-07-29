@@ -1516,6 +1516,9 @@ def generate_latex_report(poem_text, sentiment, subjectivity, mood, reading_scor
             for fig_type, line, conf, expl in sorted(figures, key=lambda x: x[2], reverse=True)
         ])
 
+        # Preprocess the poem to replace newlines with LaTeX double backslashes
+        latex_formatted_poem = escaped_poem.replace('\n', '\\\\')
+
         latex_content = f"""
 \\documentclass{{article}}
 \\usepackage{{geometry}}
@@ -1555,7 +1558,7 @@ def generate_latex_report(poem_text, sentiment, subjectivity, mood, reading_scor
 \\end{{itemize}}
 \\section*{{Original Poem}}
 \\begin{{verse}}
-{escaped_poem.replace('\n', '\\\\')}
+{latex_formatted_poem}
 \\end{{verse}}
 \\end{{document}}
 """
@@ -1563,7 +1566,6 @@ def generate_latex_report(poem_text, sentiment, subjectivity, mood, reading_scor
     except Exception as e:
         logger.error(f"Error generating LaTeX report: {e}")
         return "\\documentclass{article}\\begin{document}Error generating report.\\end{document}"
-
 def generate_poetic_badge(diversity, figures, themes, theme_scores, emotion_scores):
     try:
         figure_counts = Counter(fig_type for fig_type, _, _, _ in figures)
