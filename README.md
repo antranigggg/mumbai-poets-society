@@ -68,14 +68,3 @@ Add evaluation metrics (e.g., accuracy, F1 score) using a labeled poetry dataset
 Implement attention visualization with bertviz to showcase transformer focus on key poetic words.
 
 Modularize code into separate modules (e.g., emotion_analyzer.py) for better maintainability.
-
-
-
-
-Access the live demo: [Streamlit Cloud Link] (if hosted)
-
-Sample Output
-
-
-
-# mumbai-poets-society
