@@ -47,7 +47,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Download required NLTK data
+#required NLTK data
 try:
     nltk.download('punkt', quiet=True)
     nltk.download('averaged_perceptron_tagger', quiet=True)
@@ -97,7 +97,6 @@ nlp = load_spacy()
 emotion_classifier = load_emotion_classifier()
 empath = Empath()
 
-# Add this after your imports
 possible_paths = [
     "songs.json",  # Current directory
     os.path.join(os.path.dirname(__file__), "songs.json"),  # Script directory
@@ -105,7 +104,7 @@ possible_paths = [
     os.path.join(os.path.expanduser("~"), "Downloads", "songs.json")  # Downloads folder
 ]
 
-# Comprehensive constants
+#  constants for dynamic elements on the site
 QUOTES = [
     "Poetry is the lifeblood of rebellion, revelation, and love. – Nazim Hikmet",
     "Poetry heals the wounds inflicted by reason. – Novalis",
@@ -698,11 +697,9 @@ def analyze_sentiment(poem_text):
 
 def get_top_words(poem_text, top_n=20):
     try:
-        print(f"Original text: {poem_text}")  # Debug
+        print(f"Original text: {poem_text}")
         words = re.findall(r'\b\w+\b', poem_text.lower())
-        print(f"All words: {words}")  # Debug
-        
-        # Try to load NLTK stopwords, fall back to a default list if unavailable
+        print(f"All words: {words}") 
         try:
             stop_words = set(nltk.corpus.stopwords.words('english') + ['the', 'a', 'an', 'with', 'by'])
         except LookupError:
@@ -714,9 +711,9 @@ def get_top_words(poem_text, top_n=20):
             ])
         
         filtered_words = [w for w in words if w not in stop_words and len(w) > 2 and w.isalpha()]
-        print(f"Filtered words: {filtered_words}")  # Debug
+        print(f"Filtered words: {filtered_words}") 
         word_freq = Counter(filtered_words)
-        print(f"Word frequencies: {word_freq}")  # Debug
+        print(f"Word frequencies: {word_freq}")
         top_words = word_freq.most_common(top_n) if word_freq else []
         explanation = (
             f"Identified {len(top_words)} top words after filtering stopwords and short words. "
@@ -843,7 +840,7 @@ def analyze_emotions_comprehensive(poem_text):
             sent_words = re.findall(r'\b\w+\b', sent_text.lower())
             sent_score = {emo: 0.0 for emo in emotions}
 
-            # 1.1 Transformer-based classification with high confidence
+            # 1.1 Transformer-based classification that is equipped with high confidence
             if emotion_classifier:
                 results = emotion_classifier(sent_text)[0]
                 label_mapping = {
@@ -854,7 +851,7 @@ def analyze_emotions_comprehensive(poem_text):
             for result in results:
                 label = result['label'].lower()
                 score = result['score']
-                if label in label_mapping and score > 0.7:  # Strict threshold
+                if label in label_mapping and score > 0.7:  # Strict threshold allows more accuracy
                     emo = label_mapping[label]
                     weight = 0.6 if emo in ['anger', 'disgust'] else 0.8 if emo != 'calm' else 0.4  # Lower weight for calm
                     sent_score[emo] += score * weight
@@ -869,7 +866,7 @@ def analyze_emotions_comprehensive(poem_text):
                 for emo, centroid in emotion_centroids.items():
                     sim = cosine_similarity([sent_emb], [centroid])[0][0]
                     if sim > 0.85:  # Very strict threshold
-                        weight = 0.3 if emo in ['anger', 'disgust'] else 0.5
+                        weight = 0.3 if emo in ['anger', 'disgust'] else 0.5 #since anger and digust are very niche emotions, their threshold is higher os that they do not get detected in an artificially high value
                         sent_score[emo] += sim * weight
                         if sent_doc and any(token.dep_ in ['amod', 'advmod'] for token in sent_doc):
                             sent_score[emo] *= 1.1
@@ -892,7 +889,7 @@ def analyze_emotions_comprehensive(poem_text):
                 if keyword_hits and emo not in ['anger', 'disgust']:
                     sent_score[emo] += (keyword_hits / len(sent_words)) * 0.25
                 elif keyword_hits and emo in ['anger', 'disgust']:
-                    if keyword_hits / len(sent_words) > 0.2:  # Require strong presence
+                    if keyword_hits / len(sent_words) > 0.2:  #Makes sure that nice emotions require stronger presence to dominate the vectors
                         sent_score[emo] += (keyword_hits / len(sent_words)) * 0.15
 
             # 1.5 Apply synergies and conflicts
