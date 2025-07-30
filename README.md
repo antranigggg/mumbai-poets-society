@@ -8,7 +8,7 @@ Overview
 The Mumbai Poets Society Poetry Analyzer is a deep learning-powered web application that analyzes poetry to uncover emotional, thematic, and literary insights. Built as part of my initiative with the Mumbai Poets Society, this project applies state-of-the-art natural language processing (NLP) techniques to bridge poetry and artificial intelligence, offering poets and enthusiasts a tool to explore the emotional and narrative essence of their work. As a freshman at VIT Vellore, I developed this project to demonstrate my self-taught skills in deep learning and my passion for interdisciplinary applications of AI.
 
 
-Features
+Features:
 
 Emotion Analysis: Uses the j-hartmann/emotion-english-distilroberta-base transformer model to classify emotions (e.g., happiness, sadness, anger) in poems, with custom post-processing to enhance synergy (e.g., happy-hopeful) and reduce conflicts (e.g., happy-sadness).
 
@@ -40,7 +40,7 @@ Data Management: JSON for persistent song database
 Others: Python, LaTeX, Git
 
 
-Key Technical Achievements
+Key Technical Achievements:
 
 Transformer Integration: Leveraged DistilRoBERTa for emotion classification and SentenceTransformers for semantic embeddings, achieving high-confidence emotion detection (threshold >0.7) and precise playlist matching.
 
@@ -50,14 +50,14 @@ Interpretability: Enhanced model transparency with detailed explanations for pre
 Optimization: Utilized Streamlit’s @st.cache_resource to cache transformer models, reducing inference time for real-time analysis.
 
 
-Challenges Overcome
+Challenges Overcome:
 
 Emotion Analysis: Improved song lyric analysis by tuning emotion vectors to avoid uniform distributions, increasing semantic similarity weight by 20%.
 
 LaTeX Generation: Resolved syntax errors in report generation by preprocessing poem text to escape special characters, ensuring robust outputs.
 
 
-Future Improvements
+Future Improvements:
 
 Add a speech-to-text service that will allow greater usability.
 
