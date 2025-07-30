@@ -47,7 +47,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-#required NLTK data
+# Download required NLTK data
 try:
     nltk.download('punkt', quiet=True)
     nltk.download('averaged_perceptron_tagger', quiet=True)
@@ -104,7 +104,7 @@ possible_paths = [
     os.path.join(os.path.expanduser("~"), "Downloads", "songs.json")  # Downloads folder
 ]
 
-#  constants for dynamic elements on the site
+# Comprehensive constants
 QUOTES = [
     "Poetry is the lifeblood of rebellion, revelation, and love. – Nazim Hikmet",
     "Poetry heals the wounds inflicted by reason. – Novalis",
@@ -697,9 +697,11 @@ def analyze_sentiment(poem_text):
 
 def get_top_words(poem_text, top_n=20):
     try:
-        print(f"Original text: {poem_text}")
+        print(f"Original text: {poem_text}")  # Debug
         words = re.findall(r'\b\w+\b', poem_text.lower())
-        print(f"All words: {words}") 
+        print(f"All words: {words}")  # Debug
+        
+        # Try to load NLTK stopwords, fall back to a default list if unavailable
         try:
             stop_words = set(nltk.corpus.stopwords.words('english') + ['the', 'a', 'an', 'with', 'by'])
         except LookupError:
@@ -711,9 +713,9 @@ def get_top_words(poem_text, top_n=20):
             ])
         
         filtered_words = [w for w in words if w not in stop_words and len(w) > 2 and w.isalpha()]
-        print(f"Filtered words: {filtered_words}") 
+        print(f"Filtered words: {filtered_words}")  # Debug
         word_freq = Counter(filtered_words)
-        print(f"Word frequencies: {word_freq}")
+        print(f"Word frequencies: {word_freq}")  # Debug
         top_words = word_freq.most_common(top_n) if word_freq else []
         explanation = (
             f"Identified {len(top_words)} top words after filtering stopwords and short words. "
@@ -823,7 +825,7 @@ def analyze_emotions_comprehensive(poem_text):
             'disgust': ['happy', 'calm', 'hopeful']
         }
         
-        # Initialize tools
+        # InitializING tools
         blob = TextBlob(poem_text)
         vader = SentimentIntensityAnalyzer()
         doc = nlp(poem_text) if nlp else None
@@ -840,7 +842,7 @@ def analyze_emotions_comprehensive(poem_text):
             sent_words = re.findall(r'\b\w+\b', sent_text.lower())
             sent_score = {emo: 0.0 for emo in emotions}
 
-            # 1.1 Transformer-based classification that is equipped with high confidence
+            # 1.1 Transformer-based classification with high confidence
             if emotion_classifier:
                 results = emotion_classifier(sent_text)[0]
                 label_mapping = {
@@ -851,9 +853,9 @@ def analyze_emotions_comprehensive(poem_text):
             for result in results:
                 label = result['label'].lower()
                 score = result['score']
-                if label in label_mapping and score > 0.7:  # Strict threshold allows more accuracy
+                if label in label_mapping and score > 0.7:  # Strict threshold
                     emo = label_mapping[label]
-                    weight = 0.6 if emo in ['anger', 'disgust'] else 0.8 if emo != 'calm' else 0.4  # Lower weight for calm
+                    weight = 0.6 if emo in ['anger', 'disgust'] else 0.8 if emo != 'calm' else 0.4  # Lower weight for calm because it is often overriden by other emotions
                     sent_score[emo] += score * weight
 
             # 1.2 Semantic similarity with emotion centroids
@@ -865,8 +867,8 @@ def analyze_emotions_comprehensive(poem_text):
                 }
                 for emo, centroid in emotion_centroids.items():
                     sim = cosine_similarity([sent_emb], [centroid])[0][0]
-                    if sim > 0.85:  # Very strict threshold
-                        weight = 0.3 if emo in ['anger', 'disgust'] else 0.5 #since anger and digust are very niche emotions, their threshold is higher os that they do not get detected in an artificially high value
+                    if sim > 0.85:  # Very strict threshold for niche emotions
+                        weight = 0.3 if emo in ['anger', 'disgust'] else 0.5
                         sent_score[emo] += sim * weight
                         if sent_doc and any(token.dep_ in ['amod', 'advmod'] for token in sent_doc):
                             sent_score[emo] *= 1.1
@@ -889,7 +891,7 @@ def analyze_emotions_comprehensive(poem_text):
                 if keyword_hits and emo not in ['anger', 'disgust']:
                     sent_score[emo] += (keyword_hits / len(sent_words)) * 0.25
                 elif keyword_hits and emo in ['anger', 'disgust']:
-                    if keyword_hits / len(sent_words) > 0.2:  #Makes sure that nice emotions require stronger presence to dominate the vectors
+                    if keyword_hits / len(sent_words) > 0.2:  # Require strong presence to be detected properly due to their overriding nature
                         sent_score[emo] += (keyword_hits / len(sent_words)) * 0.15
 
             # 1.5 Apply synergies and conflicts
@@ -987,7 +989,6 @@ def analyze_emotions_comprehensive(poem_text):
 
 def generate_wordcloud(poem_text, dominant_emotion):
     try:
-        # Try to load NLTK stopwords, fall back to a default list if unavailable
         try:
             stop_words = set(nltk.corpus.stopwords.words('english') + ['the', 'a', 'an', 'with', 'by'])
         except LookupError:
@@ -1027,7 +1028,6 @@ def load_song_data():
         try:
             logger.info(f"Attempting to load song data from: {path}")
             
-            # Try standard json.load first (works for smaller files)
             try:
                 with open(path, "r", encoding='utf-8') as f:
                     songs_db = json.load(f)
@@ -1037,7 +1037,6 @@ def load_song_data():
             except (MemoryError, json.JSONDecodeError) as e:
                 logger.warning(f"Standard JSON load failed (file may be too large), trying streaming parser: {str(e)}")
             
-            # Fall back to ijson streaming parser for large files
             try:
                 import ijson
                 songs_db = []
@@ -1168,7 +1167,6 @@ def generate_playlist(poem_emotion_vector, songs_db, top_n=5):
                 logger.warning(f"Error processing song {song.get('title', 'Unknown')}: {e}")
                 continue
         
-        # Always attempt to write to json_path for debugging
         logger.info(f"Attempting to save songs_db to {json_path} (updated_songs: {updated_songs}, valid_songs: {valid_songs})")
         try:
             dir_path = os.path.dirname(json_path) or os.getcwd()
@@ -1367,7 +1365,7 @@ def analyze_themes(poem_text):
 
         # 5. Nature suppression unless overwhelmingly dominant
         max_score = max(theme_vector.values()) or 1
-        if theme_vector['nature'] < 2.0 * max([theme_vector[t] for t in LIGHT_THEMES]):  # Nature needs 2x lead
+        if theme_vector['nature'] < 2.0 * max([theme_vector[t] for t in LIGHT_THEMES]):  # Nature needs 2x lead so that keywords that may be used in description of settings do not artificially skew the theme analysis
             theme_vector['nature'] *= 0.6  # Suppress nature to secondary
 
         # 6. Aggressive normalization for distinctiveness
@@ -1391,7 +1389,7 @@ def analyze_themes(poem_text):
             theme_vector[theme] = float(softmax_scores[i])
         logger.info(f"Final theme scores: {theme_vector}")
 
-        # Stability check: Ensure dominant theme is consistent across poem segments
+        # Stability check: To ensure dominant theme is consistent across poem segments
         dominant_theme = max(theme_vector.items(), key=lambda x: x[1])[0]
         segment_scores = {theme: 0.0 for theme in THEME_KEYWORDS}
         for sentence in blob.sentences[:3]:  # Check first 3 sentences for stability
@@ -1426,7 +1424,7 @@ def analyze_themes(poem_text):
                     theme_vector[theme] = float(softmax_scores[i])
         logger.info(f"Post-stability check theme scores: {theme_vector}")
 
-        # Get dominant theme and secondary themes
+        # Analysis for dominant theme and secondary themes
         dominant_theme = max(theme_vector.items(), key=lambda x: x[1])[0]
         confidence = theme_vector[dominant_theme]
         secondary_themes = [(theme, score) for theme, score in theme_vector.items() if score > 0.05 and theme != dominant_theme]
@@ -1512,8 +1510,6 @@ def generate_latex_report(poem_text, sentiment, subjectivity, mood, reading_scor
             f'\\textit{{Explanation: {escape_latex(expl)}}}\\\\'
             for fig_type, line, conf, expl in sorted(figures, key=lambda x: x[2], reverse=True)
         ])
-
-        # Preprocess the poem to replace newlines with LaTeX double backslashes
         latex_formatted_poem = escaped_poem.replace('\n', '\\\\')
 
         latex_content = f"""
@@ -1726,7 +1722,7 @@ st.title("📜 Mumbai Poets Society Poetry Analyzer")
 st.markdown(f"*{get_random_quote()}*")
 st.markdown("Discover the hidden dimensions of your poetry through advanced linguistic analysis.")
 
-# Custom CSS for enhanced UI
+#CSS with colours that match MPS logo
 st.markdown("""
     <style>
     .stApp {
@@ -1885,7 +1881,7 @@ if st.button("Analyze Your Poem"):
                 fig_bar.update_layout(
                     plot_bgcolor='#1a1a1a', paper_bgcolor='#1a1a1a', font_color='#FFFFFF',
                     xaxis_title="Emotions", yaxis_title="Intensity",
-                    bargap=0.10,  # Reduce gap to make bars thicker, like buildings
+                    bargap=0.10,  # Reduce gap to make bars thicker
                 )
                 st.plotly_chart(fig_bar, use_container_width=False)
                 # Radar Chart
@@ -2033,10 +2029,6 @@ if st.button("Analyze Your Poem"):
                 for i, song in enumerate(playlist, 1):
                     st.markdown(f"**{i}. {song.get('title', 'Unknown Title')}** by *{song.get('artist', 'Unknown Artist')}*")
                     
-                    # Display album art if available
-                    if song.get('image_url'):
-                        st.image(song['image_url'], width=100)
-            
             # Handle preview URL
             preview_url = song.get('preview_url')
             if preview_url and preview_url.lower() not in ['none', 'null', '']:
